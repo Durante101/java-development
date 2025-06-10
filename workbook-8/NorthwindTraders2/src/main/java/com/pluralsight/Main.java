@@ -18,21 +18,29 @@ public class Main {
             String password = args[1];
 
             Scanner scanner = new Scanner(System.in);
-            System.out.println("Please enter the last name of the customers you want to search:");
-            String lastNameToSearch = scanner.nextLine();
+            System.out.println(""" 
+                    What do you want to do?
+                    1) Display all products
+                    2) Display all customers
+                    0) Exit
+                    Select an option:
+                    """);
+            String choose = scanner.nextLine();
 
             Class.forName("com.mysql.cj.jdbc.Driver");
 
             Connection connection = DriverManager.getConnection(
-                    "jdbc:mysql://localhost:3306/sakila", "root", "P@ssw0rd"
+                    "jdbc:mysql://localhost:3306/northwind", "root", "P@ssw0rd"
             );
 
-            String query = """
-                    SELECT first_name, last_name
-                    FROM customer
-                    WHERE last_name LIKE ?
-                    ORDER BY first_name;
-                    """;
+
+
+
+            }
+
+
+
+
 
             PreparedStatement preparedStatement = connection.prepareStatement(query);
 
