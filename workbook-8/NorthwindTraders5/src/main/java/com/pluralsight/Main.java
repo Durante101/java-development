@@ -1,5 +1,7 @@
 package com.pluralsight;
 
+import org.apache.commons.dbcp2.BasicDataSource;
+
 import java.sql.*;
 import java.util.Scanner;
 
@@ -14,6 +16,12 @@ public class Main {
 
         String username = args[0];
         String password = args[1];
+
+        BasicDataSource dataSource = new BasicDataSource();
+
+        dataSource.setUrl("jdbc:mysql://localhost:3306/northwind");
+        dataSource.setUsername(username);
+        dataSource.setPassword(password);
 
         Scanner scanner = new Scanner(System.in);
 
@@ -35,7 +43,7 @@ public class Main {
                     displayAllCustomers(username, password);
                     break;
                 case 3:
-                    displayAllCategories(username, password);
+                    displayAllCategories(dataSource);
                     break;
                 case 0:
                     System.out.println("Exiting...");
@@ -47,13 +55,10 @@ public class Main {
         }
     }
 
-    private static void displayAllCategories(String username, String password) {
+    private static void displayAllCategories(BasicDataSource dataSource) {
         try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-            try (Connection connection = DriverManager.getConnection(
-                    "jdbc:mysql://localhost:3306/northwind",
-                    username,
-                    password);
+            try (Connection connection = dataSource.getConnection();
+
                  PreparedStatement statement = connection.prepareStatement(
                          "SELECT CategoryID, CategoryName FROM Categories ORDER BY CategoryID");
                  ResultSet resultSet = statement.executeQuery()) {
@@ -72,17 +77,20 @@ public class Main {
                 displayProductsInCategory(connection, categoryId);
 
             }
-        } catch (ClassNotFoundException | SQLException e) {
+        } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
     private static void displayProductsInCategory(Connection connection, int categoryId) {
         String query = "SELECT ProductID, ProductName, UnitPrice, UnitsInStock FROM Products WHERE CategoryID = ?";
+
         try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setInt(1, categoryId);
+
             try (ResultSet productResultSet = preparedStatement.executeQuery()) {
                 System.out.println("\nProducts in the selected category:");
+
                 while (productResultSet.next()) {
                     int productId = productResultSet.getInt("ProductID");
                     String productName = productResultSet.getString("ProductName");
